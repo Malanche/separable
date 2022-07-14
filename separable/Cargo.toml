@@ -1,0 +1,12 @@
+[package]
+name = "separable"
+version = "0.1.0"
+description = "Separable trait for enums"
+license = "MIT"
+authors = ["Carlos Malanche <carlos.malanche.f@gmail.com>"]
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+separable-derive = {path = "../separable-derive"}
