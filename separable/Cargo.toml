@@ -1,6 +1,6 @@
 [package]
 name = "separable"
-version = "0.2.0"
+version = "0.2.1"
 description = "Separable trait for enums"
 license = "MIT"
 authors = ["Carlos Malanche <carlos.malanche.f@gmail.com>"]

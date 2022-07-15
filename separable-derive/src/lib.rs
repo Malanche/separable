@@ -66,7 +66,7 @@ fn separable_derive_wrapper(input: DeriveInput) -> Result<TokenStream, Error> {
     }).collect::<Vec<_>>();
 
     let expanded = quote! {
-        impl FromIterator<#name> for (#(#vecced_types),*) {
+        impl FromIterator<#name> for (#(#vecced_types),*, ) {
             fn from_iter<I: IntoIterator<Item=#name>>(iter: I) -> Self {
                 #(#collection_creation);*
 
@@ -76,12 +76,12 @@ fn separable_derive_wrapper(input: DeriveInput) -> Result<TokenStream, Error> {
                     }
                 }
         
-                (#(#collections),*)
+                (#(#collections),*, )
             }
         }
 
         // With mutable reference implementation
-        impl<'a> FromIterator<&'a #name> for (#(#ref_vecced_types),*) {
+        impl<'a> FromIterator<&'a #name> for (#(#ref_vecced_types),*, ) {
             fn from_iter<I: IntoIterator<Item=&'a #name>>(iter: I) -> Self {
                 #(#collection_creation);*
 
@@ -91,11 +91,11 @@ fn separable_derive_wrapper(input: DeriveInput) -> Result<TokenStream, Error> {
                     }
                 }
         
-                (#(#collections),*)
+                (#(#collections),*, )
             }
         }
 
-        impl<'a> FromIterator<&'a mut #name> for (#(#ref_mut_vecced_types),*) {
+        impl<'a> FromIterator<&'a mut #name> for (#(#ref_mut_vecced_types),*, ) {
             fn from_iter<I: IntoIterator<Item=&'a mut #name>>(iter: I) -> Self {
                 #(#collection_creation);*
 
@@ -105,20 +105,20 @@ fn separable_derive_wrapper(input: DeriveInput) -> Result<TokenStream, Error> {
                     }
                 }
         
-                (#(#collections),*)
+                (#(#collections),*, )
             }
         }
 
         impl separable::Separable for #name {
-            type Target = (#(#vecced_types),*);
+            type Target = (#(#vecced_types),*, );
         }
 
         impl<'a> separable::Separable for &'a #name {
-            type Target = (#(#ref_vecced_types),*);
+            type Target = (#(#ref_vecced_types),*, );
         }
 
         impl<'a> separable::Separable for &'a mut #name {
-            type Target = (#(#ref_mut_vecced_types),*);
+            type Target = (#(#ref_mut_vecced_types),*, );
         }
     };
 
