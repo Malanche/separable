@@ -17,10 +17,10 @@ fn main() {
         Temperature::Celsius(23.1),
         Temperature::Fahrenheit(5.0)
     ];
-    
+
     // We separate all the variants, in order
     let (celsius, fahrenheit, kelvin) = measurements.into_iter().collect();
-    
+
     // Quick verification
     assert_eq!(celsius, vec![23.0f64, 22.5f64, 23.1f64]);
     assert_eq!(fahrenheit, vec![2.0f64, 5.0f64]);

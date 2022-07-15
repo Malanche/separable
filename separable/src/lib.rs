@@ -1,6 +1,8 @@
 //! # Trait to separate an iterator of Enums
 //! 
 //! A trait that helps split up an vector of enums into a tuple with a vector per variant. It was kinda inspired by the behaviour of `Result<Vec<_>, _>`, when used with `collect`. Please let me know if such a functionality can be achieved in Rust without the macro.
+//!
+//! With the derive macro, implementations for `Self`, `&Self`, `&mut Self` are produced.
 //! 
 //! ```rust
 //! use separable::Separable;
@@ -39,4 +41,8 @@ pub use separable_derive::*;
 /// Main and only trait
 ///
 /// Exists basically to enforce the `FromIterator` trait on the enum
-pub trait Separable<E>: FromIterator<E> {}
+pub trait Separable: Sized {
+    type Target: FromIterator<Self>;
+}
+
+// impl <E, A: Fromiterator<&E> + Separable<E>> Separable<E> for &A {}

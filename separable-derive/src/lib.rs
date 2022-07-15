@@ -29,7 +29,7 @@ fn separable_derive_wrapper(input: DeriveInput) -> Result<TokenStream, Error> {
     let name = &input.ident;
 
     // Check that all the variants are tupples with one element
-    let vecced_types = enum_data.variants.iter().map(|variant| {
+    let types = enum_data.variants.iter().map(|variant| {
         match &variant.fields {
             Fields::Unnamed(unnamed) => {
                 if unnamed.unnamed.len() != 1 {
@@ -37,12 +37,18 @@ fn separable_derive_wrapper(input: DeriveInput) -> Result<TokenStream, Error> {
                 } else {
                     let field = unnamed.unnamed.first().unwrap();
                     let field_type = &field.ty;
-                    Ok(quote! {Vec<#field_type>})
+                    //Ok(quote! {Vec<#field_type>})
+                    Ok(field_type)
                 }
             },
             _ => Err(Error::custom("unsupported variant, this macro only works with unnamed single-value tuple variants", variant.ident.span()))
         }
     }).collect::<Result<Vec<_>, _>>()?;
+
+    // We create the referenced types, and mutable referenced types
+    let vecced_types = types.iter().map(|ty| quote! {Vec<#ty>}).collect::<Vec<_>>();
+    let ref_vecced_types = types.iter().map(|ty| quote! {Vec<&'a #ty>}).collect::<Vec<_>>();
+    let ref_mut_vecced_types = types.iter().map(|ty| quote! {Vec<&'a mut #ty>}).collect::<Vec<_>>();
 
     let collections = enum_data.variants.iter().enumerate().map(|(idx, _)| {
         Ident::new(&format!("collection_{}", idx), Span::call_site())
@@ -72,6 +78,47 @@ fn separable_derive_wrapper(input: DeriveInput) -> Result<TokenStream, Error> {
         
                 (#(#collections),*)
             }
+        }
+
+        // With mutable reference implementation
+        impl<'a> FromIterator<&'a #name> for (#(#ref_vecced_types),*) {
+            fn from_iter<I: IntoIterator<Item=&'a #name>>(iter: I) -> Self {
+                #(#collection_creation);*
+
+                for i in iter {
+                    match i {
+                        #(#variants),*
+                    }
+                }
+        
+                (#(#collections),*)
+            }
+        }
+
+        impl<'a> FromIterator<&'a mut #name> for (#(#ref_mut_vecced_types),*) {
+            fn from_iter<I: IntoIterator<Item=&'a mut #name>>(iter: I) -> Self {
+                #(#collection_creation);*
+
+                for i in iter {
+                    match i {
+                        #(#variants),*
+                    }
+                }
+        
+                (#(#collections),*)
+            }
+        }
+
+        impl separable::Separable for #name {
+            type Target = (#(#vecced_types),*);
+        }
+
+        impl<'a> separable::Separable for &'a #name {
+            type Target = (#(#ref_vecced_types),*);
+        }
+
+        impl<'a> separable::Separable for &'a mut #name {
+            type Target = (#(#ref_mut_vecced_types),*);
         }
     };
 
